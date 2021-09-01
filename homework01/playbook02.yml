@@ -1,0 +1,33 @@
+---
+- name: Playbook_01
+  hosts: node1.example.com
+  user: ansible
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: Delete httpd
+    package: 
+      name: httpd
+      state: absent
+
+  - name: Delete index.html
+    file:
+      path: /var/www/html/index.html
+      state: absent
+
+  - name: Close 80 and 443 ports
+    firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      state: disabled
+    loop:
+      - http
+      - https
+
+  - name: Restart firewall
+    systemd:
+      name: firewalld
+      state: reloaded
+...

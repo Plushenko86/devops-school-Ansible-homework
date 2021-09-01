@@ -1,0 +1,48 @@
+---
+- name: Playbook_03
+  hosts: node1.example.com
+  user: ansible
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: Ensure ifnames exist
+    lineinfile: 
+      path: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX=".*ifnames=0'
+      state: absent
+    check_mode: true
+    register: ifnames_check
+    changed_when: false
+
+  - name: Insert ifnames if missing
+    lineinfile:
+      path: /etc/default/grub
+      regexp: "^(GRUB_CMDLINE_LINUX=\".*)\"$"
+      line: '\1 ifnames=0"'
+      backrefs: true
+    when: ifnames_check.found == 0
+
+  - name: Ensure biosdevname exist
+    lineinfile:
+      path: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX=".*biosdevname=0'
+      state: absent
+    check_mode: true
+    register: biosdevname_check
+    changed_when: false
+
+  - name: Insert biosdevname if missing
+    lineinfile:
+      path: /etc/default/grub
+      regexp: "^(GRUB_CMDLINE_LINUX=\".*)\"$"
+      line: '\1 biosdevname=0"'
+      backrefs: true
+    when: biosdevname_check.found == 0
+
+  - name: Apply changes if needed
+    shell: grub2-mkconfig
+    when: ifnames_check.found == 0 or 
+          biosdevname_check.found == 0
+...

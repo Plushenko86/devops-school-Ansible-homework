@@ -1,0 +1,45 @@
+---
+- name: Playbook_01
+  hosts: node1.example.com
+  user: ansible
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: Install httpd
+    package: 
+      name: httpd
+      state: latest
+
+  - name: Start httpd
+    service:
+      name: httpd
+      state: started
+      enabled: true
+
+  - name: Httpd running if GREEN
+    service:
+      name: httpd
+      state: started
+
+  - name: Create index.html
+    copy:
+      dest: /var/www/html/index.html
+      content:
+        Welcome to my web server
+
+  - name: Open 80 and 443 ports
+    firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      state: enabled
+    loop:
+      - http
+      - https
+
+  - name: Restart firewall to apply changes
+    systemd:
+      name: firewalld
+      state: reloaded
+...
