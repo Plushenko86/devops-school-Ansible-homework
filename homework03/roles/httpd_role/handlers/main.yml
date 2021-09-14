@@ -1,0 +1,11 @@
+---
+  - name: reload_apache
+    service: 
+      name: httpd
+      state: reloaded
+
+  - name: firewall_restart
+    systemd:
+      name: firewalld
+      state: reloaded
+

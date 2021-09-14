@@ -1,0 +1,9 @@
+---
+
+anon_root_path: '/var/ftp/pub'
+ftp_listen: true
+local_enable: false
+write_enable: true
+anonymous_enable: true
+nopwd: true
+upload_enable: true

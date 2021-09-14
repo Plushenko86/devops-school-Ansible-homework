@@ -1,0 +1,6 @@
+---
+- name: Install httpd role
+  hosts: node1.example.com
+
+  roles:
+    - role: ftp_role

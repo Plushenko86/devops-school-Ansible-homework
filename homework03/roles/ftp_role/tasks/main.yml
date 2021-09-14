@@ -1,0 +1,68 @@
+---
+# Tasks file for ftp role
+
+  - name: Install ftp and semanage
+    package: 
+      name: "{{ item }}"
+      state: latest
+    loop:
+      - vsftpd
+      - python3-libsemanage
+      - policycoreutils-python-utils
+  
+  - name: Start ftp
+    service:
+      name: vsftpd
+      state: started
+      enabled: true
+
+  - name: ftp running if GREEN
+    service:
+      name: vsftpd
+      state: started
+
+  - name: Create ftp pub root
+    file:
+      path: /var/ftp/pub
+      state: directory
+      mode: 0755
+
+  - name: Create ftp pub upload
+    file:
+      path: /var/ftp/pub/upload
+      state: directory
+      mode: a+rwx
+      owner: ftp
+
+  - name: Create vsftpd.conf
+    template:
+      src: vsftpd.conf.j2
+      dest: /etc/vsftpd/vsftpd.conf
+    notify:
+      - reload_ftp
+
+  - name: SElinux conf
+    seboolean:
+      name: ftpd_anon_write
+      state: yes
+      persistent: yes
+#    notify: reboot
+
+  - name: Set SELinux context to upload folder
+    sefcontext:
+      target: '/var/ftp/pub/upload'
+      setype: public_content_rw_t
+      state: present
+
+  - name: Apply new SELinux file context to filesystem
+    command: restorecon -irv /var/ftp/pub/upload
+
+  - name: Open ftp ports
+    firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      state: enabled
+    loop:
+      - ftp
+    notify: reload_firewall
+...

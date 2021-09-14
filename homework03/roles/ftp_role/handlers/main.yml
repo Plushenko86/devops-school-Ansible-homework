@@ -1,0 +1,11 @@
+---
+  - name: reload_ftp
+    service: 
+      name: vsftpd
+      state: restarted
+
+  - name: reload_firewall
+    systemd:
+      name: firewalld
+      state: reloaded
+

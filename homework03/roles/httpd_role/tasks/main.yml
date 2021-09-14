@@ -1,0 +1,37 @@
+---
+# Tasks file for httpd role
+
+  - name: Install httpd
+    package: 
+      name: httpd
+      state: latest
+
+  - name: Start httpd
+    service:
+      name: httpd
+      state: started
+      enabled: true
+
+  - name: Httpd running if GREEN
+    service:
+      name: httpd
+      state: started
+
+  - name: Create index.html
+    template:
+      src: index.html.j2
+      dest: /var/www/html/index.html
+    notify:
+      - reload_apache
+
+  - name: Open 80 and 443 ports
+    firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      state: enabled
+    loop:
+      - http
+      - https
+    notify: firewall_restart
+
+...
